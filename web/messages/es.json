@@ -1,0 +1,15 @@
+{
+  "dashboard": {
+    "title": "Panel en Vivo",
+    "subtitle": "Estadísticas en tiempo real • Se actualiza cada 10 segundos",
+    "lastUpdated": "Última actualización: {time}",
+    "requestsMade": "Solicitudes Realizadas",
+    "requestsDesc": "Total de solicitudes API procesadas",
+    "tokensUsed": "Tokens Usados",
+    "tokensDesc": "Tokens de IA consumidos",
+    "activeConnections": "Conexiones Activas",
+    "connectionsDesc": "Usuarios conectados actualmente",
+    "about": "Acerca de este Panel",
+    "aboutText": "Este panel demuestra actualizaciones de datos en tiempo real usando Next.js 14 y Tailwind CSS. Los contadores se actualizan automáticamente cada 10 segundos consultando la API backend. No se requiere actualización de página - todas las actualizaciones ocurren sin problemas en segundo plano."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --use-npm --yes)",
+      "Bash(npm install next-intl stripe)",
+      "Bash(npm init -y)",
+      "Bash(npm install express cors dotenv pg stripe)",
+      "Bash(npm install -D typescript @types/node @types/express @types/cors ts-node nodemon)",
+      "Bash(npx tsc --init)",
+      "Bash(npx create-expo-app@latest . --template blank-typescript --yes)",
+      "Bash(mkdir -p web/messages)",
+      "Bash(touch README.md)",
+      "Bash(npm install --save-dev @types/pg)",
+      "Bash(npm run dev)",
+      "Bash(npm install --save-dev tsx)",
+      "Bash(curl http://localhost:4000/health)",
+      "Bash(curl http://localhost:4000/api/stats)",
+      "Bash(docker compose up --build)",
+      "Bash(docker compose up)",
+      "Bash(pkill -f \"docker compose\")",
+      "Bash(npm start)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

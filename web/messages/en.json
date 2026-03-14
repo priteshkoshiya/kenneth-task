@@ -1,0 +1,15 @@
+{
+  "dashboard": {
+    "title": "Live Dashboard",
+    "subtitle": "Real-time statistics • Updates every 10 seconds",
+    "lastUpdated": "Last updated: {time}",
+    "requestsMade": "Requests Made",
+    "requestsDesc": "Total API requests processed",
+    "tokensUsed": "Tokens Used",
+    "tokensDesc": "AI tokens consumed",
+    "activeConnections": "Active Connections",
+    "connectionsDesc": "Currently connected users",
+    "about": "About This Dashboard",
+    "aboutText": "This dashboard demonstrates real-time data updates using Next.js 14 and Tailwind CSS. The counters automatically refresh every 10 seconds by polling the backend API. No page refresh is required - all updates happen seamlessly in the background."
+  }
+}
