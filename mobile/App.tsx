@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 
 interface Message {
@@ -9,9 +10,12 @@ interface Message {
   status: 'pending' | 'approved' | 'rejected';
 }
 
+type FilterType = 'pending' | 'handled';
+
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<FilterType>('pending');
 
   useEffect(() => {
     fetchMessages();
@@ -25,6 +29,7 @@ export default function App() {
       setMessages(data);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      // Fallback mock data
       setMessages([
         {
           id: 1,
@@ -66,8 +71,12 @@ export default function App() {
     setMessages(messages.filter(msg => msg.id !== id));
   };
 
-  const pendingMessages = messages.filter(msg => msg.status === 'pending');
-  const handledMessages = messages.filter(msg => msg.status === 'approved');
+  const filteredMessages = messages.filter(msg => 
+    activeTab === 'pending' ? msg.status === 'pending' : msg.status === 'approved'
+  );
+
+  const pendingCount = messages.filter(msg => msg.status === 'pending').length;
+  const handledCount = messages.filter(msg => msg.status === 'approved').length;
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={styles.messageCard}>
@@ -126,40 +135,67 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      
-      <View style={styles.header}>
-         <View style={styles.headerTitleRow}>
-            <View style={styles.headerIconContainer}>
-               <Text style={styles.headerIcon}>📱</Text>
-            </View>
-            <View>
-               <Text style={styles.headerTitle}>Task Inbox</Text>
-               <Text style={styles.headerSubtitle}>
-                 {pendingMessages.length} Pending  ·  {handledMessages.length} Handled
-               </Text>
-            </View>
-         </View>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        
+        <View style={styles.header}>
+           <View style={styles.headerTitleRow}>
+              <View style={styles.headerIconContainer}>
+                 <Text style={styles.headerIcon}>📱</Text>
+              </View>
+              <View>
+                 <Text style={styles.headerTitle}>Task Inbox</Text>
+                 <Text style={styles.headerSubtitle}>
+                   {pendingCount} Pending  ·  {handledCount} Handled
+                 </Text>
+              </View>
+           </View>
 
-      <FlatList
-        data={messages.sort((a,b) => (a.status === 'pending' ? -1 : 1))}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-               <Text style={styles.emptyIcon}>🎉</Text>
+           <View style={styles.tabContainer}>
+              <TouchableOpacity 
+                style={[styles.tab, activeTab === 'pending' && styles.activeTab]} 
+                onPress={() => setActiveTab('pending')}
+              >
+                <Text style={[styles.tabText, activeTab === 'pending' && styles.activeTabText]}>Pending</Text>
+                {pendingCount > 0 && (
+                  <View style={[styles.tabBadge, activeTab === 'pending' ? styles.activeTabBadge : styles.inactiveTabBadge]}>
+                    <Text style={[styles.tabBadgeText, activeTab === 'pending' ? styles.activeTabBadgeText : styles.inactiveTabBadgeText]}>{pendingCount}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.tab, activeTab === 'handled' && styles.activeTab]} 
+                onPress={() => setActiveTab('handled')}
+              >
+                <Text style={[styles.tabText, activeTab === 'handled' && styles.activeTabText]}>Handled</Text>
+                {handledCount > 0 && (
+                  <View style={[styles.tabBadge, activeTab === 'handled' ? styles.activeTabBadge : styles.inactiveTabBadge]}>
+                    <Text style={[styles.tabBadgeText, activeTab === 'handled' ? styles.activeTabBadgeText : styles.inactiveTabBadgeText]}>{handledCount}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+           </View>
+        </View>
+
+        <FlatList
+          data={filteredMessages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconCircle}>
+                 <Text style={styles.emptyIcon}>{activeTab === 'pending' ? '🎉' : '📂'}</Text>
+              </View>
+              <Text style={styles.emptyTitle}>{activeTab === 'pending' ? 'Inbox Zero' : 'Empty Archive'}</Text>
+              <Text style={styles.emptyText}>{activeTab === 'pending' ? "You've handled all pending messages!" : "No messages have been handled yet."}</Text>
             </View>
-            <Text style={styles.emptyTitle}>Inbox Zero</Text>
-            <Text style={styles.emptyText}>You've handled all pending messages!</Text>
-          </View>
-        }
-      />
-    </SafeAreaView>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -185,7 +221,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 24,
     paddingTop: Platform.OS === 'android' ? 40 : 20,
-    paddingBottom: 24,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
     shadowColor: '#000',
@@ -199,6 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    marginBottom: 20,
   },
   headerIconContainer: {
     width: 48,
@@ -224,6 +260,53 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748B',
     marginTop: 2,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: -1, // Overlay bottom border
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    gap: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: '#3B82F6',
+  },
+  tabText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  activeTabText: {
+    color: '#3B82F6',
+  },
+  tabBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  activeTabBadge: {
+    backgroundColor: '#EFF6FF',
+  },
+  inactiveTabBadge: {
+    backgroundColor: '#F1F5F9',
+  },
+  tabBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  activeTabBadgeText: {
+    color: '#3B82F6',
+  },
+  inactiveTabBadgeText: {
+    color: '#64748B',
   },
   listContent: {
     padding: 20,
